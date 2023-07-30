@@ -17,6 +17,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.authenticationService = authenticationService;
     }
 
+    //Implementing authentication provider
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(this.authenticationService);
@@ -26,6 +27,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/signup", "/css/**", "/js/**").permitAll()
+                .antMatchers("/h2-console/**").permitAll()
+                .antMatchers("/logout").permitAll()
                 .anyRequest().authenticated();
 
         http.formLogin()
@@ -42,6 +45,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll();
 
         http.csrf()
-                .ignoringAntMatchers("/logout");
+                .ignoringAntMatchers("/logout")
+                .ignoringAntMatchers("/h2-console/**");
+
+        http.headers()
+                .frameOptions().disable();
+
     }
 }
