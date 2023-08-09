@@ -18,6 +18,10 @@ public class EncryptionService {
     public String encryptValue(String data, String key) {
         byte[] encryptedValue = null;
 
+        // Logging the data and key before encryption
+        logger.debug("Data before encryption: {}", data);
+        logger.debug("Key before encryption: {}", key);
+
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
@@ -34,6 +38,10 @@ public class EncryptionService {
     public String decryptValue(String data, String key) {
         byte[] decryptedValue = null;
 
+        // Logging the data and key before decryption
+        logger.debug("Data before decryption: {}", data);
+        logger.debug("Key before decryption: {}", key);
+
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             SecretKey secretKey = new SecretKeySpec(key.getBytes(), "AES");
@@ -47,4 +55,5 @@ public class EncryptionService {
         assert decryptedValue != null;
         return new String(decryptedValue);
     }
+
 }

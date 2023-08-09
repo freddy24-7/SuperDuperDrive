@@ -75,7 +75,7 @@ The home page is the center of the application and hosts the three required piec
 
  iii. Credentials
  - The user should be able to store credentials for specific websites and see a list of the credentials they've previously stored. If you display passwords in this list, make sure they're encrypted!
- - The user should be able to view/edit or delete individual credentials. When the user views the credential, they should be able to see the unencrypted password.
+ - The user should be able to view/edit or delete individual credentials. When the user views the credentials, they should be able to see the unencrypted password.
 
 The home page should have a logout button that allows the user to logout of the application and keep their data private.
 
@@ -93,7 +93,7 @@ Your tech lead trusts you to do a good job, but testing is important whether you
  - Write a test that deletes a note and verifies that the note is no longer displayed.
 
 
-3. Write tests for credential creation, viewing, editing, and deletion.
+3. Write tests for credentials creation, viewing, editing, and deletion.
  - Write a test that creates a set of credentials, verifies that they are displayed, and verifies that the displayed password is encrypted.
  - Write a test that views an existing set of credentials, verifies that the viewable password is unencrypted, edits the credentials, and verifies that the changes are displayed.
  - Write a test that deletes an existing set of credentials and verifies that the credentials are no longer displayed.

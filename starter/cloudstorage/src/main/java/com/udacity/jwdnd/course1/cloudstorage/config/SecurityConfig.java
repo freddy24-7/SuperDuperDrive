@@ -29,6 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/signup", "/css/**", "/js/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/logout").permitAll()
+                .antMatchers("/result").authenticated()
                 .anyRequest().authenticated();
 
         http.formLogin()
