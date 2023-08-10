@@ -23,14 +23,14 @@
         </nav>
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                <form action="#" enctype="multipart/form-data" method="POST">
+                <form action="#"  th:action="@{/upload}" enctype="multipart/form-data" method="POST">
                     <div class="container">
                         <div class="row" style="margin: 1em;">
                             <div class="col-sm-2">
-                                <label for="fileUpload">Upload a New File:</label>
+                                <label for="fileUpload"  >Upload a New File:</label>
                             </div>
                             <div class="col-sm-6">
-                                <input type="file" class="form-control-file" id="fileUpload" name="fileUpload">
+                                <input type="file"   class="form-control-file" id="fileUpload" name="fileUpload">
                             </div>
                             <div class="col-sm-4">
                                 <button type="submit" class="btn btn-dark" id="uploadButton">Upload</button>
@@ -47,12 +47,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
+                        <tr th:each = "files : ${files}">
                             <td>
-                                <a target="_blank" class="btn btn-success">View</a>
-                                <a  class="btn btn-danger">Delete</a>
+                                <a th:href="@{/download/{fileid} (fileid=${files.fileid})}" th:download="${files.filename}" target="_blank" class="btn btn-success">Download</a>
+                                <a th:href="@{/delete/{fileid} (fileid=${files.fileid})}" class="btn btn-danger">Delete</a>
                             </td>
-                            <th scope="row">ExampleFile.txt</th>
+                            <th th:text=${files.filename} scope="row">ExampleFile.txt</th>
                         </tr>
                         </tbody>
                     </table>

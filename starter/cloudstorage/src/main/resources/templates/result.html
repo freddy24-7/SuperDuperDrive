@@ -20,8 +20,10 @@
     </div>
     <div  th:if="${result=='Error'}" class="alert alert-danger fill-parent">
         <h1 class="display-5">Error</h1>
-        <span th:text="${errorMessage}">Something went wrong :)</span> <!-- Display the error message here -->
         <span>Click <a th:href="@{/home}">here</a> to continue.</span>
+    </div>
+    <div th:if="${not #strings.isEmpty(result) and result != 'success'}" class="alert alert-danger fill-parent">
+        <p th:text="${result}"></p>
     </div>
 </div>
 </body>

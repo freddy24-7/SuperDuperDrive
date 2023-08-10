@@ -9,8 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Controller
 @AllArgsConstructor
 @RequestMapping
@@ -43,22 +41,6 @@ public class CredentialsController {
         }
             return "result";
         }
-
-    @GetMapping("/home")
-    public String displayHomePage(Authentication authentication, Model model) {
-        try {
-            String userName = authentication.getName();
-
-            //Getting the list of credentials (encrypted)
-            List<Credentials> credentialsList = credentialsService.getAllCredentials(userName);
-            model.addAttribute("credentials", credentialsList);
-
-        } catch (CredentialsControllerException e) {
-            setErrorModelAttributes(model, e.getMessage());
-            return "result";
-        }
-        return "home";
-    }
 
     public void setErrorModelAttributes(Model model, String errorMessage) {
         model.addAttribute("result", "Error");
