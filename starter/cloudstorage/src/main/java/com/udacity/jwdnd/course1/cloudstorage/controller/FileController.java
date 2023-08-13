@@ -2,6 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.exceptions.EmptyFileException;
 import com.udacity.jwdnd.course1.cloudstorage.exceptions.FileAlreadyExistsException;
+import com.udacity.jwdnd.course1.cloudstorage.exceptions.FileUploadException;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -21,15 +22,18 @@ public class FileController {
     public String uploadFile(Authentication authentication, @RequestParam("fileUpload") MultipartFile file, Model model) {
         try {
             if (file.isEmpty()) {
-                throw new EmptyFileException("You are trying an empty file");
+                throw new EmptyFileException("You are trying to upload an empty file");
             }
             if (fileService.fileAvailable(file, authentication.getName())) {
                 throw new FileAlreadyExistsException("File already exists with the same name.");
             }
+            if (file.getSize() > 1024 * 1024) {
+                throw new FileUploadException("File size exceeds 1 MB");
+            }
             fileService.uploadFile(file, authentication.getName());
             model.addAttribute("result", "success");
             model.addAttribute("files", fileService.fileList(authentication.getName()));
-        } catch (EmptyFileException | FileAlreadyExistsException e) {
+        } catch (EmptyFileException | FileAlreadyExistsException | FileUploadException e) {
             model.addAttribute("result", "Error: " + e.getMessage());
         }
         return "result";

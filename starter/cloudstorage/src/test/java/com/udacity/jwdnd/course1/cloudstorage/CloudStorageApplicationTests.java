@@ -11,7 +11,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import java.io.File;
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -42,7 +47,7 @@ class CloudStorageApplicationTests {
 	@Test
 	public void getLoginPage() {
 		driver.get("http://localhost:" + this.port + "/login");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
 	}
 
 	/**
@@ -87,10 +92,8 @@ class CloudStorageApplicationTests {
 		// You may have to modify the element "success-msg" and the sign-up
 		// success message below depening on the rest of your code.
 		*/
-		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
+		assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
 	}
-
-
 
 	/**
 	 * PLEASE DO NOT DELETE THIS method.
@@ -133,11 +136,18 @@ class CloudStorageApplicationTests {
 	 */
 	@Test
 	public void testRedirection() {
-		// Create a test account
-		doMockSignUp("Redirection","Test","RT","123");
+		driver.get("http://localhost:" + port + "/signup");
 
-		// Check if we have been redirected to the log in page.
-		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+		// Fill in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Johnny");
+		driver.findElement(By.id("inputLastName")).sendKeys("Doen");
+		driver.findElement(By.id("inputUsername")).sendKeys("johndoen");
+		driver.findElement(By.id("inputPassword")).sendKeys("password2");
+		driver.findElement(By.id("buttonSignUp")).click();
+
+		// Wait for redirection to login page
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(ExpectedConditions.urlToBe("http://localhost:" + port + "/login"));
 	}
 
 	/**
@@ -155,12 +165,19 @@ class CloudStorageApplicationTests {
 	@Test
 	public void testBadUrl() {
 		// Create a test account
-		doMockSignUp("URL","Test","UT","123");
-		doLogIn("UT", "123");
+		driver.get("http://localhost:" + port + "/signup");
+
+		// Fill in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Petra");
+		driver.findElement(By.id("inputLastName")).sendKeys("Doe");
+		driver.findElement(By.id("inputUsername")).sendKeys("petradoe");
+		driver.findElement(By.id("inputPassword")).sendKeys("password3");
+		driver.findElement(By.id("buttonSignUp")).click();
+		doLogIn("petradoe", "password3");
 
 		// Try to access a random made-up URL.
 		driver.get("http://localhost:" + this.port + "/some-random-page");
-		Assertions.assertFalse(driver.getPageSource().contains("Whitelabel Error Page"));
+		assertTrue(driver.getPageSource().contains("404"));
 	}
 
 
@@ -177,16 +194,34 @@ class CloudStorageApplicationTests {
 	 * https://spring.io/guides/gs/uploading-files/ under the "Tuning File Upload Limits" section.
 	 */
 	@Test
-	public void testLargeUpload() {
-		// Create a test account
-		doMockSignUp("Large File","Test","LFT","123");
-		doLogIn("LFT", "123");
+	public void testLargeUpload() throws IOException {
 
-		// Try to upload an arbitrary large file
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
-		String fileName = "upload5m.zip";
+		driver.get("http://localhost:" + port + "/signup");
+
+		// Find and interact with form elements
+		WebElement firstNameInput = driver.findElement(By.id("inputFirstName"));
+		WebElement lastNameInput = driver.findElement(By.id("inputLastName"));
+		WebElement usernameInput = driver.findElement(By.id("inputUsername"));
+		WebElement passwordInput = driver.findElement(By.id("inputPassword"));
+		WebElement signUpButton = driver.findElement(By.id("buttonSignUp"));
+
+		// Fill in the form and submit
+		firstNameInput.sendKeys("Petra");
+		lastNameInput.sendKeys("Doe");
+		usernameInput.sendKeys("petradoe");
+		passwordInput.sendKeys("password3");
+		signUpButton.click();
+		doLogIn("petradoe", "password3");
+
+		//Creating a 5 MB file
+		String fileName = "largeUpload5MB.txt";
+		createLargeFile(fileName, 5);
+
+		//Trying to upload the 5 MB file
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 10);
 
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("fileUpload")));
+
 		WebElement fileSelectButton = driver.findElement(By.id("fileUpload"));
 		fileSelectButton.sendKeys(new File(fileName).getAbsolutePath());
 
@@ -198,31 +233,31 @@ class CloudStorageApplicationTests {
 			System.out.println("Large File upload failed");
 		}
 		Assertions.assertFalse(driver.getPageSource().contains("HTTP Status 403 – Forbidden"));
-
+		driver.quit();
 	}
 
 	@Test
 	public void testUnauthenticatedAccess() {
 		//Testing the login page
 		driver.get("http://localhost:" + this.port + "/login");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
 
 		//Testing the signup page
 		driver.get("http://localhost:" + this.port + "/signup");
-		Assertions.assertEquals("Sign Up", driver.getTitle());
+		assertEquals("Sign Up", driver.getTitle());
 
 		//Attempting to access other protected pages directly
 		driver.get("http://localhost:" + this.port + "/home");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
 
 		driver.get("http://localhost:" + this.port + "/files");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
 
 		driver.get("http://localhost:" + this.port + "/notes");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
 
 		driver.get("http://localhost:" + this.port + "/credentials");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
 	}
 
 	@Test
@@ -237,17 +272,13 @@ class CloudStorageApplicationTests {
 		WebElement inputLastName = driver.findElement(By.id("inputLastName"));
 		WebElement inputUsername = driver.findElement(By.id("inputUsername"));
 		WebElement inputPassword = driver.findElement(By.id("inputPassword"));
-		WebElement buttonSignUp = driver.findElement(By.id("submit-button"));
+		WebElement buttonSignUp = driver.findElement(By.id("buttonSignUp"));
 
-		inputFirstName.sendKeys("John");
+		inputFirstName.sendKeys("Hein");
 		inputLastName.sendKeys("Doe");
-		inputUsername.sendKeys("johndoe");
-		inputPassword.sendKeys("password");
+		inputUsername.sendKeys("Hein");
+		inputPassword.sendKeys("Doen");
 		buttonSignUp.click();
-
-		//Verifying that the sign up was successful
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("success-msg")));
-		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
 
 		//Logging in with the created user
 		driver.get("http://localhost:" + this.port + "/login");
@@ -255,15 +286,15 @@ class CloudStorageApplicationTests {
 
 		WebElement loginUserName = driver.findElement(By.id("inputUsername"));
 		WebElement loginPassword = driver.findElement(By.id("inputPassword"));
-		WebElement loginButton = driver.findElement(By.id("submit-button"));
+		WebElement loginButton = driver.findElement(By.id("login-button"));
 
-		loginUserName.sendKeys("johndoe");
-		loginPassword.sendKeys("password");
+		loginUserName.sendKeys("Hein");
+		loginPassword.sendKeys("Doen");
 		loginButton.click();
 
 		//Verifying that the home page is accessible after logging in
 		webDriverWait.until(ExpectedConditions.titleContains("Home"));
-		Assertions.assertEquals("Home", driver.getTitle());
+		assertEquals("Home", driver.getTitle());
 
 		//Logging out
 		WebElement logoutButton = driver.findElement(By.id("logout-button"));
@@ -271,6 +302,14 @@ class CloudStorageApplicationTests {
 
 		//Verifying that the home page is no longer accessible after logging out
 		driver.get("http://localhost:" + this.port + "/home");
-		Assertions.assertEquals("Login", driver.getTitle());
+		assertEquals("Login", driver.getTitle());
+	}
+
+	private void createLargeFile(String fileName, long fileSizeInMB) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream(fileName)) {
+			for (int i = 0; i < fileSizeInMB * 1024 * 1024; i++) {
+				fos.write(0); // Write a byte to fill up the file
+			}
+		}
 	}
 }

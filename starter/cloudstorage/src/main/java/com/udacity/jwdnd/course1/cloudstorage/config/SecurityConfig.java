@@ -47,7 +47,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.csrf()
                 .ignoringAntMatchers("/logout")
-                .ignoringAntMatchers("/h2-console/**");
+                .ignoringAntMatchers("/h2-console/**")
+                .ignoringAntMatchers("/upload/**");
 
         http.headers()
                 .frameOptions().disable();
