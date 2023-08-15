@@ -29,12 +29,6 @@ public class FileService {
         try {
             Integer userId = userMapper.getUser(userName).getUserId();
             String fileName = getCleanedFileName(multipartFile);
-
-            //Checking if file size exceeds 10MB (as size limit)
-            if (multipartFile.getSize() > 10 * 1024 * 1024) {
-                throw new FileUploadException("File size exceeds the limit of 10MB.");
-            }
-
             File file = createFileObject(fileName, multipartFile, userId);
             fileMapper.insertFile(file);
         } catch (NullPointerException e) {
