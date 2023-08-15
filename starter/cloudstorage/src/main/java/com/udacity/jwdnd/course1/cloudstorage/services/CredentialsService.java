@@ -63,4 +63,9 @@ public class CredentialsService {
                 credentials.getUsername(), encodedKey, encryptedPassword,
                 userMapper.getUser(userName).getUserId());
     }
+
+    public String retrieveEncodedKeyForCredential(Integer credentialId) {
+        Credentials credential = credentialsMapper.getCredentialById(credentialId);
+        return credential != null ? credential.getKey() : null;
+    }
 }

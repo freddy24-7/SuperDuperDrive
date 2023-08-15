@@ -52,7 +52,6 @@ public class EncryptionService {
             logger.error(e.getMessage());
         }
 
-        assert decryptedValue != null;
         return new String(decryptedValue);
     }
 

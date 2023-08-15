@@ -2,6 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
+import org.mockito.MockitoAnnotations;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -13,12 +14,14 @@ import org.springframework.boot.web.server.LocalServerPort;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.io.File;
+
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
+
 
 	@LocalServerPort
 	private int port;
@@ -42,6 +45,11 @@ class CloudStorageApplicationTests {
 		if (this.driver != null) {
 			driver.quit();
 		}
+	}
+
+	@BeforeEach
+	public void setup() {
+		MockitoAnnotations.initMocks(this);
 	}
 
 	@Test
@@ -128,9 +136,8 @@ class CloudStorageApplicationTests {
 	 * rest of your code.
 	 * This test is provided by Udacity to perform some basic sanity testing of
 	 * your code to ensure that it meets certain rubric criteria.
-	 *
 	 * If this test is failing, please ensure that you are handling redirecting users
-	 * back to the login page after a succesful sign up.
+	 * back to the login page after a successful sign up.
 	 * Read more about the requirement in the rubric:
 	 * https://review.udacity.com/#!/rubrics/2724/view
 	 */
@@ -155,10 +162,8 @@ class CloudStorageApplicationTests {
 	 * rest of your code.
 	 * This test is provided by Udacity to perform some basic sanity testing of
 	 * your code to ensure that it meets certain rubric criteria.
-	 *
 	 * If this test is failing, please ensure that you are handling bad URLs
 	 * gracefully, for example with a custom error page.
-	 *
 	 * Read more about custom error pages at:
 	 * https://attacomsian.com/blog/spring-boot-custom-error-page#displaying-custom-error-page
 	 */
@@ -186,10 +191,8 @@ class CloudStorageApplicationTests {
 	 * rest of your code.
 	 * This test is provided by Udacity to perform some basic sanity testing of
 	 * your code to ensure that it meets certain rubric criteria.
-	 *
 	 * If this test is failing, please ensure that you are handling uploading large files (>1MB),
 	 * gracefully in your code.
-	 *
 	 * Read more about file size limits here:
 	 * https://spring.io/guides/gs/uploading-files/ under the "Tuning File Upload Limits" section.
 	 */
@@ -303,6 +306,269 @@ class CloudStorageApplicationTests {
 		//Verifying that the home page is no longer accessible after logging out
 		driver.get("http://localhost:" + this.port + "/home");
 		assertEquals("Login", driver.getTitle());
+	}
+
+	@Test
+	public void testCredentialsCreationAndDisplay() throws InterruptedException {
+		//Creating a test account
+		driver.get("http://localhost:" + port + "/signup");
+
+		//Filling in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Koen");
+		driver.findElement(By.id("inputLastName")).sendKeys("Hein");
+		driver.findElement(By.id("inputUsername")).sendKeys("koen");
+		driver.findElement(By.id("inputPassword")).sendKeys("password10");
+		driver.findElement(By.id("buttonSignUp")).click();
+		doLogIn("koen", "password10");
+
+		WebElement CredentialsButton = driver.findElement(By.id("nav-credentials-tab"));
+		CredentialsButton.click();
+
+		//Waiting for the "Add New Credentials" button to become clickable
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		WebElement addCredentialsButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("new-credentials")));
+
+		//Clicking the button
+		addCredentialsButton.click();
+
+		//Waiting for the modal to become visible
+		WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+
+		//Locating and interacting with the form fields
+		WebElement urlInput = modal.findElement(By.id("credentials-url"));
+		WebElement usernameInput = modal.findElement(By.id("credentials-username"));
+		WebElement passwordInput = modal.findElement(By.id("credentials-password"));
+		WebElement submitButton = modal.findElement(By.id("SubmitCredential"));
+
+		//Filling in the form fields
+		urlInput.sendKeys("http://example.com");
+		usernameInput.sendKeys("testuser");
+		passwordInput.sendKeys("testpassword");
+
+		//Clicking the submit button
+		submitButton.click();
+
+		//Clicking the success button
+		WebElement successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		//Clicking credential button
+		WebElement reClickCredButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		reClickCredButton.click();
+
+		//Verifying that the new credentials are displayed in the table
+		WebElement urlCell = driver.findElement(By.id("URL-show"));
+		WebElement usernameCell = driver.findElement(By.id("user-name-show"));
+		WebElement passwordCell = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("Pass-show")));
+		String passwordText = passwordCell.getText();
+
+		assertEquals("http://example.com", urlCell.getText());
+		assertEquals("testuser", usernameCell.getText());
+
+		//Verifying working encryption
+		assertNotEquals("testpassword", passwordText);
+
+	}
+
+	@Test
+	public void testCredentialsEditingAndDecryption() throws InterruptedException {
+		//Creating a test account
+		driver.get("http://localhost:" + port + "/signup");
+
+		//Filling in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Koen");
+		driver.findElement(By.id("inputLastName")).sendKeys("Hein");
+		driver.findElement(By.id("inputUsername")).sendKeys("koen");
+		driver.findElement(By.id("inputPassword")).sendKeys("password10");
+		driver.findElement(By.id("buttonSignUp")).click();
+		doLogIn("koen", "password10");
+
+		WebElement CredentialsButton = driver.findElement(By.id("nav-credentials-tab"));
+		CredentialsButton.click();
+
+		//Waiting for the "Add New Credentials" button to become clickable
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		WebElement addCredentialsButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("new-credentials")));
+
+		//Clicking the button
+		addCredentialsButton.click();
+
+		//Waiting for the modal to become visible
+		WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+
+		//Locating and interacting with the form fields
+		WebElement urlInput = modal.findElement(By.id("credentials-url"));
+		WebElement usernameInput = modal.findElement(By.id("credentials-username"));
+		WebElement passwordInput = modal.findElement(By.id("credentials-password"));
+		WebElement submitButton = modal.findElement(By.id("SubmitCredential"));
+
+		//Filling in the form fields
+		urlInput.sendKeys("http://example.com");
+		usernameInput.sendKeys("testuser");
+		passwordInput.sendKeys("testpassword");
+
+		//Clicking the submit button
+		submitButton.click();
+
+		//Clicking the success button
+		WebElement successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		//Clicking credential button
+		WebElement reClickCredButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		reClickCredButton.click();
+
+		//Verifying that the new credentials are displayed in the table
+		WebElement urlCell = driver.findElement(By.id("URL-show"));
+		WebElement usernameCell = driver.findElement(By.id("user-name-show"));
+		WebElement passwordCell = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("Pass-show")));
+		String passwordText = passwordCell.getText();
+
+		assertEquals("http://example.com", urlCell.getText());
+		assertEquals("testuser", usernameCell.getText());
+
+		//Verifying working encryption
+		assertNotEquals("testpassword", passwordText);
+		System.out.println(passwordText);
+
+		//Waiting for the edit button to become visible
+		wait = new WebDriverWait(driver, 10);
+		WebElement editButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-edit")));
+		editButton.click();
+		Thread.sleep(5000);
+		WebElement editModal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+
+		//Locating and interacting with the form fields in the edit modal
+		WebElement urlEditInput = editModal.findElement(By.id("credentials-url"));
+		WebElement usernameEditInput = editModal.findElement(By.id("credentials-username"));
+		WebElement passwordEditInput = editModal.findElement(By.id("credentials-password"));
+
+		//Extracting the values from the form fields
+		String editedUrl = urlEditInput.getAttribute("value");
+		String editedUsername = usernameEditInput.getAttribute("value");
+		String editedPassword = passwordEditInput.getAttribute("value");
+
+		//Verifying working decryption
+		assertEquals("testpassword", editedPassword);
+
+		//Printing or using the extracted values
+		System.out.println("Edited URL: " + editedUrl);
+		System.out.println("Edited Username: " + editedUsername);
+		System.out.println("Edited Password: " + editedPassword);
+
+		passwordEditInput.sendKeys("testpassword1005");
+		Thread.sleep(5000);
+
+		//Clicking the submit button
+		submitButton = editModal.findElement(By.id("SubmitCredential"));
+		submitButton.click();
+		//Clicking the success button
+		successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+		//Clicking credential button
+		reClickCredButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		reClickCredButton.click();
+		//Waiting for the edit button to become visible
+		wait = new WebDriverWait(driver, 10);
+		editButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-edit")));
+		editButton.click();
+		Thread.sleep(5000);
+
+		//Locating and interacting with the form fields in the edit modal
+		editModal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+		passwordEditInput = editModal.findElement(By.id("credentials-password"));
+
+		//Extracting the values from the form fields
+		editedPassword = passwordEditInput.getAttribute("value");
+		System.out.println("Edited Password: " + editedPassword);
+
+		//Verifying that the new password is correctly displayed
+		assertEquals("testpasswordtestpassword1005", editedPassword);
+
+		driver.quit();
+	}
+
+	@Test
+	public void testDeleteAndVerifyDelete() throws InterruptedException {
+		//Creating a test account
+		driver.get("http://localhost:" + port + "/signup");
+
+		//Filling in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Koen");
+		driver.findElement(By.id("inputLastName")).sendKeys("Hein");
+		driver.findElement(By.id("inputUsername")).sendKeys("koen");
+		driver.findElement(By.id("inputPassword")).sendKeys("password10");
+		driver.findElement(By.id("buttonSignUp")).click();
+		doLogIn("koen", "password10");
+
+		WebElement CredentialsButton = driver.findElement(By.id("nav-credentials-tab"));
+		CredentialsButton.click();
+
+		//Waiting for the "Add New Credentials" button to become clickable
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		WebElement addCredentialsButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("new-credentials")));
+
+		//Clicking the button
+		addCredentialsButton.click();
+
+		//Waiting for the modal to become visible
+		WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+
+		//Locating and interacting with the form fields
+		WebElement urlInput = modal.findElement(By.id("credentials-url"));
+		WebElement usernameInput = modal.findElement(By.id("credentials-username"));
+		WebElement passwordInput = modal.findElement(By.id("credentials-password"));
+		WebElement submitButton = modal.findElement(By.id("SubmitCredential"));
+
+		//Filling in the form fields
+		urlInput.sendKeys("http://example.com");
+		usernameInput.sendKeys("testuser");
+		passwordInput.sendKeys("testpassword");
+
+		//Clicking the submit button
+		submitButton.click();
+
+		//Clicking the success button
+		WebElement successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		//Clicking credential button
+		WebElement reClickCredButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		reClickCredButton.click();
+
+		//Verifying that the new credentials are displayed in the table
+		WebElement urlCell = driver.findElement(By.id("URL-show"));
+		WebElement usernameCell = driver.findElement(By.id("user-name-show"));
+		WebElement passwordCell = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("Pass-show")));
+		String passwordText = passwordCell.getText();
+
+		assertEquals("http://example.com", urlCell.getText());
+		assertEquals("testuser", usernameCell.getText());
+
+		//Waiting for the edit button to become visible
+		wait = new WebDriverWait(driver, 10);
+		WebElement deleteButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentials-delete")));
+		deleteButton.click();
+
+		successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		wait = new WebDriverWait(driver, 10);
+		//Clicking credential button
+		reClickCredButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		reClickCredButton.click();
+		Thread.sleep(5000);
+
+		//Verifying that credential is deleted
+		String[] textsToCheck = {"Delete", "Edit"};
+
+		//Checking if each text is not present on the loaded page
+		for (String textToCheck : textsToCheck) {
+			WebElement elementWithText = driver.findElement(By.xpath("//*[contains(text(), '" + textToCheck + "')]"));
+			assertFalse(elementWithText.isDisplayed(), "'" + textToCheck + "' is displayed on the page");
+		}
+
+		driver.quit();
 	}
 
 	private void createLargeFile(String fileName, long fileSizeInMB) throws IOException {
