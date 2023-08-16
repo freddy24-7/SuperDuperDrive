@@ -26,11 +26,9 @@ public class CredentialsService {
 
     public void updateCredentials(Credentials credentials, String userName) {
         Credentials existingCredentials = credentialsMapper.getCredentialById(credentials.getCredentialId());
-
         if (existingCredentials != null) {
             String encodedKey = existingCredentials.getKey();
             String decryptedPassword = encryptionService.decryptValue(existingCredentials.getPassword(), encodedKey);
-
             existingCredentials.setUrl(credentials.getUrl());
             existingCredentials.setUsername(credentials.getUsername());
 
@@ -62,10 +60,5 @@ public class CredentialsService {
         return new Credentials(credentials.getCredentialId(), credentials.getUrl(),
                 credentials.getUsername(), encodedKey, encryptedPassword,
                 userMapper.getUser(userName).getUserId());
-    }
-
-    public String retrieveEncodedKeyForCredential(Integer credentialId) {
-        Credentials credential = credentialsMapper.getCredentialById(credentialId);
-        return credential != null ? credential.getKey() : null;
     }
 }

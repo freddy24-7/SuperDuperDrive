@@ -87,10 +87,10 @@ Your tech lead trusts you to do a good job, but testing is important whether you
  - Write a test that signs up a new user, logs in, verifies that the home page is accessible, logs out, and verifies that the home page is no longer accessible. 
 
 
-2. Write tests for note creation, viewing, editing, and deletion.
- - Write a test that creates a note, and verifies it is displayed.
- - Write a test that edits an existing note and verifies that the changes are displayed.
- - Write a test that deletes a note and verifies that the note is no longer displayed.
+2. Write tests for notes creation, viewing, editing, and deletion.
+ - Write a test that creates a notes, and verifies it is displayed.
+ - Write a test that edits an existing notes and verifies that the changes are displayed.
+ - Write a test that deletes a notes and verifies that the notes is no longer displayed.
 
 
 3. Write tests for credentials creation, viewing, editing, and deletion.
