@@ -136,9 +136,9 @@
                                 <button   id="credential-edit" th:onclick="showCredentialModal([[${credentials.credentialId}]],[[${credentials.url}]],[[${credentials.username}]],[[${credentials.getDecryptedPassword()}]])" type="button" class="btn btn-success">Edit</button>
                                 <a  id="credentials-delete"  th:href="@{/{credentialId} (credentialId=${credentials.credentialId})}" class="btn btn-danger">Delete</a>
                             </td>
-                            <th id="URL-show" th:text=${credentials.url} scope="row">Example Credentials URL</th>
-                            <td id="user-name-show" th:text=${credentials.username}>Example Credentials Username</td>
-                            <td id="Pass-show"th:text=${credentials.password}>Example Credentials Password</td>
+                            <th th:text=${credentials.url} scope="row">Example Credentials URL</th>
+                            <td th:text=${credentials.username}>Example Credentials Username</td>
+                            <td th:text=${credentials.password}>Example Credentials Password</td>
                         </tr>
                         </tbody>
                     </table>
