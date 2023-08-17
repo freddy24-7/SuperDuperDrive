@@ -31,6 +31,8 @@ public class CredentialsController {
         return "result";
     }
 
+
+
     @GetMapping("/{credentialId}")
     public String deleteCredential(Authentication authentication, Model model, @PathVariable Integer credentialId) {
         try {

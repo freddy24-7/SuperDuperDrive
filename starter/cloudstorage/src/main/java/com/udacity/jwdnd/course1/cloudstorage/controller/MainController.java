@@ -2,7 +2,9 @@ package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialsService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
+import com.udacity.jwdnd.course1.cloudstorage.services.NotesService;
 import lombok.AllArgsConstructor;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +18,7 @@ public class MainController {
 
     private final CredentialsService credentialsService;
     private final FileService fileService;
+    private final NotesService notesService;
 
     @GetMapping
     public String homeView(Authentication authentication, Model model) {
@@ -23,6 +26,7 @@ public class MainController {
             String userName = authentication.getName();
             model.addAttribute("files", fileService.fileList(userName));
             model.addAttribute("credentials", credentialsService.getAllCredentials(userName));
+            model.addAttribute("notes", notesService.getAllNotes(userName));
             return "home";
         } catch (Exception e) {
             model.addAttribute("result", "Error: " + e.getMessage());
