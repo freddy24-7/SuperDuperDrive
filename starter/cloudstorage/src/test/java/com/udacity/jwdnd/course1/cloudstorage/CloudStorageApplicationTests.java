@@ -7,6 +7,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -489,7 +490,7 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
-	public void testDeleteAndVerifyDelete() throws InterruptedException {
+	public void testDeleteAndVerifyDeleteCredential() throws InterruptedException {
 		//Creating a test account
 		driver.get("http://localhost:" + port + "/signup");
 
@@ -545,7 +546,7 @@ class CloudStorageApplicationTests {
 		assertEquals("http://example.com", urlCell.getText());
 		assertEquals("testuser", usernameCell.getText());
 
-		//Waiting for the edit button to become visible
+		//Waiting for the delete button to become visible
 		wait = new WebDriverWait(driver, 10);
 		WebElement deleteButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentials-delete")));
 		deleteButton.click();
@@ -569,6 +570,244 @@ class CloudStorageApplicationTests {
 		}
 
 		driver.quit();
+	}
+
+	@Test
+	public void testNoteCreationAndDisplay() throws InterruptedException {
+		//Creating a test account
+		driver.get("http://localhost:" + port + "/signup");
+
+		//Filling in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Koen");
+		driver.findElement(By.id("inputLastName")).sendKeys("Hein");
+		driver.findElement(By.id("inputUsername")).sendKeys("koen");
+		driver.findElement(By.id("inputPassword")).sendKeys("password10");
+		driver.findElement(By.id("buttonSignUp")).click();
+		doLogIn("koen", "password10");
+
+		WebElement NoteButton = driver.findElement(By.id("nav-notes-tab"));
+		NoteButton.click();
+
+		//Waiting for the "Notes" button to become clickable
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		WebElement addNoteButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("new-Note")));
+
+		//Clicking the button
+		addNoteButton.click();
+
+		//Waiting for the modal to become visible
+		WebElement noteModal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("noteModal")));
+
+		//Locating and interacting with the form fields
+		WebElement noteTitleInput = noteModal.findElement(By.id("notes-title"));
+		WebElement noteDescriptionInput = noteModal.findElement(By.id("notes-description"));
+		WebElement submitButton = noteModal.findElement(By.id("SubmitNote"));
+
+		//Filling in the form fields
+		noteTitleInput.sendKeys("My first note");
+		noteDescriptionInput.sendKeys("A lot to say on a first note");
+
+		//Clicking the submit button
+		submitButton.click();
+
+		//Clicking the success button
+		WebElement successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		//Clicking note button
+		WebElement reClickNoteButton = driver.findElement(By.id("nav-notes-tab"));
+		reClickNoteButton.click();
+
+		//Verifying that the new note is displayed in the table
+		WebElement titleCell = driver.findElement(By.id("titleNote"));
+		WebElement descriptionCell = driver.findElement(By.id("descriptionNote"));
+
+		Thread.sleep(5000);
+
+		assertEquals("My first note", titleCell.getText());
+		assertEquals("A lot to say on a first note", descriptionCell.getText());
+
+	}
+
+	@Test
+	public void testNoteCreationEditAndDisplay() throws InterruptedException {
+
+		//Creating a test account
+		driver.get("http://localhost:" + port + "/signup");
+
+		//Filling in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Koen");
+		driver.findElement(By.id("inputLastName")).sendKeys("Hein");
+		driver.findElement(By.id("inputUsername")).sendKeys("koen");
+		driver.findElement(By.id("inputPassword")).sendKeys("password10");
+		driver.findElement(By.id("buttonSignUp")).click();
+		doLogIn("koen", "password10");
+
+		WebElement NoteButton = driver.findElement(By.id("nav-notes-tab"));
+		NoteButton.click();
+
+		//Waiting for the "Notes" button to become clickable
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		WebElement addNoteButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("new-Note")));
+
+		//Clicking the button
+		addNoteButton.click();
+
+		//Waiting for the modal to become visible
+		WebElement noteModal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("noteModal")));
+
+		//Locating and interacting with the form fields
+		WebElement noteTitleInput = noteModal.findElement(By.id("notes-title"));
+		WebElement noteDescriptionInput = noteModal.findElement(By.id("notes-description"));
+		WebElement submitButton = noteModal.findElement(By.id("SubmitNote"));
+
+		//Filling in the form fields
+		noteTitleInput.sendKeys("My first note");
+		noteDescriptionInput.sendKeys("A lot to say");
+
+		//Clicking the submit button
+		submitButton.click();
+
+		//Clicking the success button
+		WebElement successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		//Clicking note button
+		WebElement reClickNoteButton = driver.findElement(By.id("nav-notes-tab"));
+		reClickNoteButton.click();
+
+		//Verifying that the new note is displayed in the table
+		WebElement titleCell = driver.findElement(By.id("titleNote"));
+		WebElement descriptionCell = driver.findElement(By.id("descriptionNote"));
+
+		Thread.sleep(5000);
+
+		assertEquals("My first note", titleCell.getText());
+		assertEquals("A lot to say", descriptionCell.getText());
+
+		//Waiting for the edit button to become visible
+		wait = new WebDriverWait(driver, 10);
+		WebElement noteEditButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("edit-notes")));
+		noteEditButton.click();
+		Thread.sleep(5000);
+
+		//Waiting for the modal to become visible
+		noteModal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("noteModal")));
+
+		//Locating and interacting with the form fields
+		noteTitleInput = noteModal.findElement(By.id("notes-title"));
+		noteDescriptionInput = noteModal.findElement(By.id("notes-description"));
+		submitButton = noteModal.findElement(By.id("SubmitNote"));
+
+		//Filling in the form fields
+		noteTitleInput.sendKeys(" indeed");
+		noteDescriptionInput.sendKeys(" indeed");
+
+		//Clicking the submit button
+		submitButton.click();
+
+		//Clicking the success button
+		successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		//Clicking note button
+		reClickNoteButton = driver.findElement(By.id("nav-notes-tab"));
+		reClickNoteButton.click();
+
+		//Verifying that the new note is displayed in the table
+		WebElement newTitleCell = driver.findElement(By.id("titleNote"));
+		WebElement newDescriptionCell = driver.findElement(By.id("descriptionNote"));
+
+		Thread.sleep(5000);
+
+		//Verifying that edited values are displayed
+		assertEquals("My first note indeed", newTitleCell.getText());
+		assertEquals("A lot to say indeed", newDescriptionCell.getText());
+
+	}
+
+	@Test
+	public void testNoteCreationAndDelete() throws InterruptedException {
+
+		//Creating a test account
+		driver.get("http://localhost:" + port + "/signup");
+
+		//Filling in signup form
+		driver.findElement(By.id("inputFirstName")).sendKeys("Koen");
+		driver.findElement(By.id("inputLastName")).sendKeys("Hein");
+		driver.findElement(By.id("inputUsername")).sendKeys("koen");
+		driver.findElement(By.id("inputPassword")).sendKeys("password10");
+		driver.findElement(By.id("buttonSignUp")).click();
+		doLogIn("koen", "password10");
+
+		WebElement NoteButton = driver.findElement(By.id("nav-notes-tab"));
+		NoteButton.click();
+
+		//Waiting for the "Notes" button to become clickable
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		WebElement addNoteButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("new-Note")));
+
+		//Clicking the button
+		addNoteButton.click();
+
+		//Waiting for the modal to become visible
+		WebElement noteModal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("noteModal")));
+
+		//Locating and interacting with the form fields
+		WebElement noteTitleInput = noteModal.findElement(By.id("notes-title"));
+		WebElement noteDescriptionInput = noteModal.findElement(By.id("notes-description"));
+		WebElement submitButton = noteModal.findElement(By.id("SubmitNote"));
+
+		//Filling in the form fields
+		noteTitleInput.sendKeys("My first note");
+		noteDescriptionInput.sendKeys("A lot to say");
+
+		//Clicking the submit button
+		submitButton.click();
+
+		//Clicking the success button
+		WebElement successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		//Clicking note button
+		WebElement reClickNoteButton = driver.findElement(By.id("nav-notes-tab"));
+		reClickNoteButton.click();
+
+		//Verifying that the new note is displayed in the table
+		WebElement titleCell = driver.findElement(By.id("titleNote"));
+		WebElement descriptionCell = driver.findElement(By.id("descriptionNote"));
+
+		Thread.sleep(5000);
+
+		assertEquals("My first note", titleCell.getText());
+		assertEquals("A lot to say", descriptionCell.getText());
+		//Waiting for the delete button to become visible
+		wait = new WebDriverWait(driver, 10);
+		WebElement deleteButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("delete-note")));
+		deleteButton.click();
+
+		successButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
+		successButton.click();
+
+		wait = new WebDriverWait(driver, 10);
+		//Clicking credential button
+		WebElement reClickNoteButtonAgain = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		reClickNoteButtonAgain.click();
+		Thread.sleep(5000);
+
+		//Verifying that credential is deleted
+		String[] textsToCheck = {"Delete", "Edit"};
+
+		//Checking if each text is not present on the loaded page
+		for (String textToCheck : textsToCheck) {
+			WebElement elementText = driver.findElement(By.xpath("//*[contains(text(), '" + textToCheck + "')]"));
+			assertFalse(elementText.isDisplayed(), "'" + textToCheck + "' is displayed on the page");
+		}
+
+		driver.quit();
+
+
+
 	}
 
 	private void createLargeFile(String fileName, long fileSizeInMB) throws IOException {
