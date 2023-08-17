@@ -76,7 +76,7 @@
                         <tr th:each = "notes : ${notes}">
                         <td>
                                 <button  type="button" id="edit-notes"   th:onclick="showNoteModal([[${notes.noteid}]],[[${notes.notetitle}]],[[${notes.notedescription}]])" class="btn btn-success">Edit</button>
-                            <a id="delete-note" th:href="@{/delete/{noteid} (noteid=${notes.getNoteid()})}" class="btn btn-danger">Delete</a>
+                            <a id="delete-note" th:href="@{/deletenote/{noteid} (noteid=${notes.getNoteid()})}" class="btn btn-danger">Delete</a>
                         </td>
                             <th scope="row" id="titleNote" th:text =${notes.notetitle}>Example Note Title</th>
                             <td id="descriptionNote" th:text =${notes.notedescription}>Example Note Description </td>
@@ -136,9 +136,9 @@
                                 <button   id="credential-edit" th:onclick="showCredentialModal([[${credentials.credentialId}]],[[${credentials.url}]],[[${credentials.username}]],[[${credentials.getDecryptedPassword()}]])" type="button" class="btn btn-success">Edit</button>
                                 <a  id="credentials-delete"  th:href="@{/{credentialId} (credentialId=${credentials.credentialId})}" class="btn btn-danger">Delete</a>
                             </td>
-                            <th id="URL-show" th:text=${credentials.url} scope="row">Example Credentials URL</th>
-                            <td id="user-name-show" th:text=${credentials.username}>Example Credentials Username</td>
-                            <td id="Pass-show" th:text=${credentials.password}>Example Credentials Password</td>
+                            <th id="idURL" th:text=${credentials.url} scope="row">Example Credentials URL</th>
+                            <td id="idusername" th:text=${credentials.username}>Example Credentials Username</td>
+                            <td id="idpassword" th:text=${credentials.password}>Example Credentials Password</td>
                         </tr>
                         </tbody>
                     </table>
